@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Thirdweb;
 using UnityEngine;
 
@@ -15,6 +13,13 @@ public class ButtonContactDetector : MonoBehaviour
     // When the box collider comes into contact with the hands
     private async void OnTriggerEnter(Collider other)
     {
+        if (Application.isEditor)
+        {
+            Debug
+                .Log("Connect Wallet not supported in Editor. Build and run on device.");
+            return;
+        }
+
         // If the tag is player
         if (other.gameObject.tag == "Player")
         {

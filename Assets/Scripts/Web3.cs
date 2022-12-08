@@ -14,7 +14,16 @@ public class Web3 : MonoBehaviour
     async void Start()
     {
         sdk = new ThirdwebSDK("optimism-goerli");
-        await LoadNft();
+
+        if (Application.isEditor)
+        {
+            prefabUrl =
+                "https://gateway.ipfscdn.io/ipfs/QmZGU4nEJKpD5DLhbcTr2fi79ZZatXg59ir1gbaBenP48e";
+        }
+        else
+        {
+            await LoadNft();
+        }
         StartCoroutine(SpawnNft());
     }
 
@@ -28,7 +37,7 @@ public class Web3 : MonoBehaviour
             sdk.GetContract("0x5745Bd4F05B4c5786Db03be8Bd7982B30f495222");
 
         Debug.Log("Got contract" + contract);
-        var nft = await contract.ERC721.Get("1");
+        var nft = await contract.ERC721.Get("4");
 
         Debug.Log("Got NFT" + nft);
         prefabUrl = nft.metadata.image;
@@ -41,38 +50,44 @@ public class Web3 : MonoBehaviour
     IEnumerator SpawnNft()
     {
         Debug.Log("Begining spawn");
+        Debug.Log("Prefab URL: " + prefabUrl);
 
-        // Download the prefab from the given URL
-        using (WWW www = new WWW(prefabUrl))
+        string bundleUrl = prefabUrl;
+        string assetName = "Cube";
+
+        //request asset bundle
+        UnityWebRequest www =
+            UnityWebRequestAssetBundle.GetAssetBundle(prefabUrl);
+
+        // Send the request and wait for a response
+        yield return www.SendWebRequest();
+
+        if (www.isNetworkError)
         {
-            // Wait for the download to complete
-            yield return www;
+            Debug.Log("Network error");
 
-            Debug.Log("Got prefab");
+            // Print error
+            Debug.Log(www.error);
+        }
+        else
+        {
+            AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(www);
 
-            // Check for errors
-            if (www.error != null)
-            {
-                Debug.LogError("Error downloading prefab: " + www.error);
-                yield break;
-            }
+            Debug.Log("Got bundle");
+            Debug.Log (bundle);
 
-            Debug.Log (www);
-
-            // Load the prefab from the downloaded data
-            AssetBundle prefabBundle = AssetBundle.LoadFromMemory(www.bytes);
-
-            Debug.Log("Got prefab bundle");
-            Debug.Log (prefabBundle);
-
-            GameObject prefab = prefabBundle.LoadAsset<GameObject>("GemStone");
-
+            // Inside the bundle, there is a file called gem.purple which is a prefab
+            GameObject prefab = bundle.LoadAsset<GameObject>(assetName);
             Debug.Log("Got prefab");
             Debug.Log (prefab);
 
-            // Instantiate the prefab
             // Instantiate at position: 0, -4, 34
-            Instantiate(prefab, new Vector3(0, -4, 34), Quaternion.identity);
+            GameObject instance =
+                Instantiate(prefab, new Vector3(0, 3, 5), Quaternion.identity);
+
+            // Get the Material from the prefab
+            Material material = instance.GetComponent<Renderer>().material;
+            material.shader = Shader.Find("Standard");
         }
     }
 
