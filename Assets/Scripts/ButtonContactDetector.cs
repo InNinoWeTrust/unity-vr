@@ -7,7 +7,7 @@ public class ButtonContactDetector : MonoBehaviour
 
     void Start()
     {
-        sdk = new ThirdwebSDK("goerli");
+        sdk = new ThirdwebSDK("optimism-goerli");
     }
 
     // When the box collider comes into contact with the hands
@@ -29,7 +29,7 @@ public class ButtonContactDetector : MonoBehaviour
                     .Connect(new WalletConnection()
                     {
                         provider = WalletProvider.CoinbaseWallet,
-                        chainId = 5 // Switch the wallet Goerli on connection
+                        chainId = 420 // Switch the wallet Goerli on connection
                     });
         }
     }
