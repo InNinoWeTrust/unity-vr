@@ -10,7 +10,6 @@ public class Web3 : MonoBehaviour
 
     private string assetBundleUrl;
 
-    [System.Obsolete]
     async void Start()
     {
         sdk = new ThirdwebSDK("optimism-goerli");
@@ -27,7 +26,6 @@ public class Web3 : MonoBehaviour
         return assetBundleUrl;
     }
 
-    [System.Obsolete]
     IEnumerator SpawnNft()
     {
         string assetName = "Cube";
@@ -37,7 +35,7 @@ public class Web3 : MonoBehaviour
 
         yield return www.SendWebRequest();
 
-        if (www.isNetworkError)
+        if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log("Network error");
             Debug.Log(www.error);
@@ -54,18 +52,5 @@ public class Web3 : MonoBehaviour
             Material material = instance.GetComponent<Renderer>().material;
             material.shader = Shader.Find("Standard");
         }
-    }
-
-    public async void ConnectWallet()
-    {
-        // Connect to the user's wallet via CoinbaseWallet
-        string address =
-            await sdk
-                .wallet
-                .Connect(new WalletConnection()
-                {
-                    provider = WalletProvider.CoinbaseWallet,
-                    chainId = 420 // Switch the wallet Optimism Goerli on connection
-                });
     }
 }
